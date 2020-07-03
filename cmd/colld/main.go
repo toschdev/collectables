@@ -16,8 +16,7 @@ import (
 	"github.com/tosch110/collectables/app"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/client/debug"
-	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -43,7 +42,7 @@ func main() {
 	cobra.EnableCommandSorting = false
 	rootCmd := &cobra.Command{
 		Use:               "colld",
-		Short:             "collectables app Daemon (server)",
+		Short:             "NFT Daemon (server)",
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 
@@ -58,13 +57,14 @@ func main() {
 	)
 	rootCmd.AddCommand(genutilcli.ValidateGenesisCmd(ctx, cdc, app.ModuleBasics))
 	rootCmd.AddCommand(AddGenesisAccountCmd(ctx, cdc, app.DefaultNodeHome, app.DefaultCLIHome))
-	rootCmd.AddCommand(flags.NewCompletionCmd(rootCmd, true))
-	rootCmd.AddCommand(debug.Cmd(cdc))
+	rootCmd.AddCommand(client.NewCompletionCmd(rootCmd, true))
+	rootCmd.AddCommand(testnetCmd(ctx, cdc, app.ModuleBasics, auth.GenesisAccountIterator{}))
+	rootCmd.AddCommand(replayCmd())
 
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
 	// prepare and add flags
-	executor := cli.PrepareBaseCmd(rootCmd, "AU", app.DefaultNodeHome)
+	executor := cli.PrepareBaseCmd(rootCmd, "GA", app.DefaultNodeHome)
 	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
 		0, "Assert registered invariants every N blocks")
 	err := executor.Execute()
@@ -80,7 +80,7 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application
 		cache = store.NewCommitKVStoreCacheManager()
 	}
 
-	return app.NewInitApp(
+	return app.NewCollectablesApp(
 		logger, db, traceStore, true, invCheckPeriod,
 		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
 		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
@@ -95,15 +95,14 @@ func exportAppStateAndTMValidators(
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 
 	if height != -1 {
-		aApp := app.NewInitApp(logger, db, traceStore, false, uint(1))
-		err := aApp.LoadHeight(height)
+		gapp := app.NewCollectablesApp(logger, db, traceStore, false, uint(1))
+		err := gapp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
 		}
-		return aApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+		return gapp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
 
-	aApp := app.NewInitApp(logger, db, traceStore, true, uint(1))
-
-	return aApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+	gapp := app.NewCollectablesApp(logger, db, traceStore, true, uint(1))
+	return gapp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

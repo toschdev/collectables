@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 
@@ -10,14 +9,12 @@ import (
 
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
-	authvesting "github.com/cosmos/cosmos-sdk/x/auth/vesting"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 )
 
@@ -42,20 +39,14 @@ the address will be looked up in the local Keybase. The list of initial tokens m
 contain valid denominations. Accounts may optionally be supplied with vesting parameters.
 `,
 		Args: cobra.ExactArgs(2),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			config := ctx.Config
 			config.SetRoot(viper.GetString(cli.HomeFlag))
 
 			addr, err := sdk.AccAddressFromBech32(args[0])
-			inBuf := bufio.NewReader(cmd.InOrStdin())
 			if err != nil {
 				// attempt to lookup address from Keybase if no address was provided
-				kb, err := keys.NewKeyring(
-					sdk.KeyringServiceName(),
-					viper.GetString(flags.FlagKeyringBackend),
-					viper.GetString(flagClientHome),
-					inBuf,
-				)
+				kb, err := keys.NewKeyBaseFromDir(viper.GetString(flagClientHome))
 				if err != nil {
 					return err
 				}
@@ -85,17 +76,16 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 
 			baseAccount := auth.NewBaseAccount(addr, coins.Sort(), nil, 0, 0)
 			if !vestingAmt.IsZero() {
-				baseVestingAccount, err := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
-				if err != nil {
-					return fmt.Errorf("failed to create base vesting account: %w", err)
-				}
+				baseVestingAccount := auth.NewBaseVestingAccount(
+					baseAccount, vestingAmt.Sort(), sdk.Coins{}, sdk.Coins{}, vestingEnd,
+				)
 
 				switch {
 				case vestingStart != 0 && vestingEnd != 0:
-					genAccount = authvesting.NewContinuousVestingAccountRaw(baseVestingAccount, vestingStart)
+					genAccount = auth.NewContinuousVestingAccountRaw(baseVestingAccount, vestingStart)
 
 				case vestingEnd != 0:
-					genAccount = authvesting.NewDelayedVestingAccountRaw(baseVestingAccount)
+					genAccount = auth.NewDelayedVestingAccountRaw(baseVestingAccount)
 
 				default:
 					return errors.New("invalid vesting parameters; must supply start and end time or end time")
@@ -143,7 +133,6 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 	}
 
 	cmd.Flags().String(cli.HomeFlag, defaultNodeHome, "node's home directory")
-	cmd.Flags().String(flags.FlagKeyringBackend, flags.DefaultKeyringBackend, "Select keyring's backend (os|file|test)")
 	cmd.Flags().String(flagClientHome, defaultClientHome, "client's home directory")
 	cmd.Flags().String(flagVestingAmt, "", "amount of coins for vesting accounts")
 	cmd.Flags().Uint64(flagVestingStart, 0, "schedule start time (unix epoch) for vesting accounts")
