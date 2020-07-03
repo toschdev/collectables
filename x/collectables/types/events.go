@@ -2,7 +2,7 @@ package types
 
 // NFT module event types
 var (
-	EventTypeSend              = "transfer_nft"
+	EventTypeSend              = "send_nft"
 	EventTypeEditNFTMetadata   = "edit_nft_metadata"
 	EventTypeMintNFT           = "mint_nft"
 	EventTypeBuyNFT            = "buy_nft"

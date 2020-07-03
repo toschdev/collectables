@@ -360,23 +360,19 @@ func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
 
 // MsgChallengeNFT defines a ChallengeNFT message
 type MsgChallengeNFT struct {
-	Contender      sdk.AccAddress `json:"contender" yaml:"contender"`
-	Defiant        sdk.AccAddress `json:"defiant" yaml:"defiant"`
-	ContenderID    string         `json:"contenderid" yaml:"contenderid"`
-	ContenderDenom string         `json:"contenderdenom" yaml:"contenderdenom"`
-	DefiantID      string         `json:"defiantid" yaml:"defiantid"`
-	DefiantDenom   string         `json:"defiantdenom" yaml:"defiantdenom"`
+	ContenderID    string `json:"contenderid" yaml:"contenderid"`
+	ContenderDenom string `json:"contenderdenom" yaml:"contenderdenom"`
+	DefiantID      string `json:"defiantid" yaml:"defiantid"`
+	DefiantDenom   string `json:"defiantdenom" yaml:"defiantdenom"`
 }
 
 // NewMsgChallengeNFT is a constructor function for MsgChallengeNFT
-func NewMsgChallengeNFT(contender, defiant sdk.AccAddress, contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
+func NewMsgChallengeNFT(contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
 	return NewMsgChallengeNFT{
-		Contender:      contender,
-		Defiant:        defiant,
-		ContenderID:    strings.TrimSpace(contenderid),
 		ContenderDenom: strings.TrimSpace(contenderdenom),
+		ContenderID:    strings.TrimSpace(contenderid),
+		DefiantDenom:   strings.TrimSpace(defiantdenom)
 		DefiantID:      strings.TrimSpace(defiantid),
-		DefiantDenom:   strings.TrimSpace(defiantdenom),
 	}
 }
 
@@ -430,8 +426,6 @@ type MsgChallengeNFTProof struct {
 	Recipient sdk.AccAddress `json:"recipient" yaml:"recipient"`
 	ID        string         `json:"id" yaml:"id"`
 	Denom     string         `json:"denom" yaml:"denom"`
-	Hash      string         `json:"hash" yaml:"hash"`
-	Proof     string         `json:"proof" yaml:"proof"`
 }
 
 // NewMsgChallengeNFTProofis a constructor function for MsgChallengeNFTProof
@@ -439,10 +433,8 @@ func NewMsgChallengeNFTProof(sender, recipient sdk.AccAddress, id, denom, hash, 
 	return MsgChallengeNFTProof{
 		Sender:    sender,
 		Recipient: recipient,
-		ID:        strings.TrimSpace(id),
 		Denom:     strings.TrimSpace(denom),
-		Hash:      strings.TrimSpace(hash),
-		Proof:     strings.TrimSpace(proof),
+		ID:        strings.TrimSpace(id),
 	}
 }
 
@@ -458,12 +450,6 @@ func (msg MsgChallengeNFTProof) ValidateBasic() error {
 		return ErrInvalidNFT
 	}
 	if strings.TrimSpace(msg.ID) == "" {
-		return ErrInvalidNFT
-	}
-	if strings.TrimSpace(msg.Hash) == "" {
-		return ErrInvalidNFT
-	}
-	if strings.TrimSpace(msg.Proof) == "" {
 		return ErrInvalidNFT
 	}
 	if msg.Sender.Empty() {
