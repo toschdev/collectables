@@ -1,26 +1,35 @@
 package types
 
-// GenesisState - all collectables state that must be provided at genesis
+import (
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+)
+
+// GenesisState is the state that must be provided at genesis.
 type GenesisState struct {
-	// TODO: Fill out what is needed by the module for genesis
+	Owners      []Owner     `json:"owners"`
+	Collections Collections `json:"collections"`
 }
 
-// NewGenesisState creates a new GenesisState object
-func NewGenesisState( /* TODO: Fill out with what is needed for genesis state */) GenesisState {
+// NewGenesisState creates a new genesis state.
+func NewGenesisState(owners []Owner, collections Collections) GenesisState {
 	return GenesisState{
-		// TODO: Fill out according to your genesis state
+		Owners:      owners,
+		Collections: collections,
 	}
 }
 
-// DefaultGenesisState - default GenesisState used by Cosmos Hub
+// DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
-	return GenesisState{
-		// TODO: Fill out according to your genesis state, these values will be initialized but empty
-	}
+	return NewGenesisState([]Owner{}, NewCollections())
 }
 
-// ValidateGenesis validates the collectables genesis parameters
+// ValidateGenesis performs basic validation of nfts genesis data returning an
+// error for any failed validation criteria.
 func ValidateGenesis(data GenesisState) error {
-	// TODO: Create a sanity check to make sure the state conforms to the modules needs
+	for _, Owner := range data.Owners {
+		if Owner.Address.Empty() {
+			return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "address cannot be empty")
+		}
+	}
 	return nil
 }

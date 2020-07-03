@@ -1,15 +1,26 @@
 package types
 
-// collectables module event types
-const (
-	// TODO: Create your event types
-	// EventType<Action>    		= "action"
-
-	// TODO: Create keys fo your events, the values will be derivided from the msg
-	// AttributeKeyAddress  		= "address"
-
-	// TODO: Some events may not have values for that reason you want to emit that something happened.
-	// AttributeValueDoubleSign = "double_sign"
+// NFT module event types
+var (
+	EventTypeSend              = "transfer_nft"
+	EventTypeEditNFTMetadata   = "edit_nft_metadata"
+	EventTypeMintNFT           = "mint_nft"
+	EventTypeBuyNFT            = "buy_nft"
+	EventTypeSellNFT           = "sell_nft"
+	EventTypeBurnNFT           = "burn_nft"
+	EventTypeChallengeNFT      = "challenge_nft"
+	EventTypeChallengeNFTProof = "challenge_nft_proof"
 
 	AttributeValueCategory = ModuleName
+
+	AttributeKeySender    = "sender"
+	AttributeKeyRecipient = "recipient"
+	AttributeKeyOwner     = "owner"
+	AttributeKeyNFTID     = "nft-id"
+	AttributeKeyNFTName   = "name"
+	AttributeKeyNFTHash   = "hash"
+	AttributeKeyNFTProof  = "proof"
+	AttributeKeyWins      = "wins"
+	AttributeKeyLosses    = "losses"
+	AttributeKeyDenom     = "denom"
 )

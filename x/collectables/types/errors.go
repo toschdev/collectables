@@ -4,8 +4,11 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// TODO: Fill out some custom errors for the module
-// You can see how they are constructed below:
 var (
-	ErrInvalid = sdkerrors.Register(ModuleName, 1, "custom error message")
+	ErrInvalidCollection = sdkerrors.Register(ModuleName, 1, "invalid NFT collection")
+	ErrUnknownCollection = sdkerrors.Register(ModuleName, 2, "unknown NFT collection")
+	ErrInvalidNFT        = sdkerrors.Register(ModuleName, 3, "invalid NFT")
+	ErrUnknownNFT        = sdkerrors.Register(ModuleName, 4, "unknown NFT")
+	ErrNFTAlreadyExists  = sdkerrors.Register(ModuleName, 5, "NFT already exists")
+	ErrEmptyProof        = sdkerrors.Register(ModuleName, 6, "NFT proof can't be empty")
 )
