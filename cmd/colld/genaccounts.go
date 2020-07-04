@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -64,35 +63,19 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 				return fmt.Errorf("failed to parse coins: %w", err)
 			}
 
-			vestingStart := viper.GetInt64(flagVestingStart)
-			vestingEnd := viper.GetInt64(flagVestingEnd)
-			vestingAmt, err := sdk.ParseCoins(viper.GetString(flagVestingAmt))
-			if err != nil {
-				return fmt.Errorf("failed to parse vesting amount: %w", err)
-			}
+			// vestingStart := viper.GetInt64(flagVestingStart)
+			// vestingEnd := viper.GetInt64(flagVestingEnd)
+			// vestingAmt, err := sdk.ParseCoins(viper.GetString(flagVestingAmt))
+			// if err != nil {
+			// 	return fmt.Errorf("failed to parse vesting amount: %w", err)
+			// }
 
 			// create concrete account type based on input parameters
 			var genAccount authexported.GenesisAccount
 
 			baseAccount := auth.NewBaseAccount(addr, coins.Sort(), nil, 0, 0)
-			if !vestingAmt.IsZero() {
-				baseVestingAccount := auth.NewBaseVestingAccount(
-					baseAccount, vestingAmt.Sort(), sdk.Coins{}, sdk.Coins{}, vestingEnd,
-				)
 
-				switch {
-				case vestingStart != 0 && vestingEnd != 0:
-					genAccount = auth.NewContinuousVestingAccountRaw(baseVestingAccount, vestingStart)
-
-				case vestingEnd != 0:
-					genAccount = auth.NewDelayedVestingAccountRaw(baseVestingAccount)
-
-				default:
-					return errors.New("invalid vesting parameters; must supply start and end time or end time")
-				}
-			} else {
-				genAccount = baseAccount
-			}
+			genAccount = baseAccount
 
 			if err := genAccount.Validate(); err != nil {
 				return fmt.Errorf("failed to validate new genesis account: %w", err)

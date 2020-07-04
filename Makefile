@@ -1,33 +1,14 @@
-PACKAGES=$(shell go list ./... | grep -v '/simulation')
-
-VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
-COMMIT := $(shell git log -1 --format='%H')
-
-# TODO: Update the ldflags with the app, client & server names
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=NewApp \
-	-X github.com/cosmos/cosmos-sdk/version.ServerName=colld \
-	-X github.com/cosmos/cosmos-sdk/version.ClientName=collcli \
-	-X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
-	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) 
-
-BUILD_FLAGS := -ldflags '$(ldflags)'
-
-all: install
+all: lint install
 
 install: go.sum
-		go install -mod=readonly $(BUILD_FLAGS) ./cmd/colld
-		go install -mod=readonly $(BUILD_FLAGS) ./cmd/collcli
+		GO111MODULE=on go install -tags "$(build_tags)" ./cmd/colld
+		GO111MODULE=on go install -tags "$(build_tags)" ./cmd/collcli
 
 go.sum: go.mod
 		@echo "--> Ensure dependencies have not been modified"
 		GO111MODULE=on go mod verify
 
-# Uncomment when you have some tests
-# test:
-# 	@go test -mod=readonly $(PACKAGES)
-
-# look into .golangci.yml for enabling / disabling linters
 lint:
-	@echo "--> Running linter"
-	@golangci-lint run
-	@go mod verify
+	golangci-lint run
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" | xargs gofmt -d -s
+	go mod verify
