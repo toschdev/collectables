@@ -65,7 +65,7 @@ type sendNFTReq struct {
 	Recipient string       `json:"recipient"`
 }
 
-func transferNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+func sendNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req sendNFTReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
@@ -108,7 +108,7 @@ func editNFTMetadataHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 		}
 
 		// create the message
-		msg := types.NewMsgEditNFTMetadata(cliCtx.GetFromAddress(), req.ID, req.Denom, req.TokenURI)
+		msg := types.NewMsgEditNFTMetadata(cliCtx.GetFromAddress(), req.ID, req.Denom, req.Name)
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
@@ -199,7 +199,7 @@ type sellNFTReq struct {
 	Ask     sdk.Coins    `json:"ask"`
 }
 
-func buyNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+func sellNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req sellNFTReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
@@ -238,7 +238,7 @@ func challengeNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		}
 
 		// create the message
-		msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), req.ID, req.ContenderDenom, req.ContenderID, req.DefiantDenom, req.DefiantID)
+		msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), req.ContenderDenom, req.ContenderID, req.DefiantDenom, req.DefiantID)
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
@@ -252,7 +252,7 @@ type challengeNFTProofReq struct {
 
 func challengeNFTProofHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req challengeNFTReq
+		var req challengeNFTProofReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "failed to parse request")
 			return
@@ -263,7 +263,7 @@ func challengeNFTProofHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.
 		}
 
 		// create the message
-		msg := types.NewMsgChallengeNFTProof(cliCtx.GetFromAddress(), req.Recipient, req.Denom, req.ID)
+		msg := types.NewMsgChallengeNFTProof(cliCtx.GetFromAddress(), req.Denom, req.ID)
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }

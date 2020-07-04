@@ -16,15 +16,16 @@ type BaseNFT struct {
 	ID    string         `json:"id,omitempty" yaml:"id"` // id of the token; not exported to clients
 	Owner sdk.AccAddress `json:"owner" yaml:"owner"`     // account address that owns the NFT
 	//gamification data
-	Hash   string `json:"hash" yaml:"hash"` // blake3 hash of the proof
-	Proof  string `json:"proof" yaml:"proof"`
-	Name   string `json:"name" yaml:"name"`
-	Wins   uint   `json:"wins" yaml:"wins"`
-	Losses uint   `json:"losses" yaml:"losses"`
+	Hash   string    `json:"hash" yaml:"hash"`     // blake3 hash of the proof
+	Proof  string    `json:"proof" yaml:"proof"`   // Proof, input for the hash (25-255 character)
+	Name   string    `json:"name" yaml:"name"`     // The user given name of the NFT Token
+	Wins   uint      `json:"wins" yaml:"wins"`     // Challenge Wins
+	Losses uint      `json:"losses" yaml:"losses"` // Challenge Losses
+	Price  sdk.Coins `json:"price" yaml:"price"`   // The price set for the token
 }
 
 // NewBaseNFT creates a new NFT instance
-func NewBaseNFT(id string, owner sdk.AccAddress, hash, proof, name string, wins, losses uint) BaseNFT {
+func NewBaseNFT(id string, owner sdk.AccAddress, hash, proof, name string, wins, losses uint, price sdk.Coins) BaseNFT {
 	return BaseNFT{
 		ID:     id,
 		Owner:  owner,
@@ -33,6 +34,7 @@ func NewBaseNFT(id string, owner sdk.AccAddress, hash, proof, name string, wins,
 		Name:   strings.TrimSpace(name),
 		Wins:   wins,
 		Losses: losses,
+		Price:  price,
 	}
 }
 
@@ -62,9 +64,27 @@ func (bnft BaseNFT) GetWins() uint { return bnft.Wins }
 // GetLosses returns the path to optional extra properties
 func (bnft BaseNFT) GetLosses() uint { return bnft.Losses }
 
+// GetPrice returns the price for an NFT Token
+func (bnft *BaseNFT) GetPrice() uint { return bnft.Price }
+
+// EditPrice removes an Ask order to an nft.
+func (bnft *BaseNFT) EditPrice(price sdk.Coins) {
+	bnft.Price = price
+}
+
 // EditMetadata edits metadata of an nft
 func (bnft *BaseNFT) EditMetadata(name string) {
 	bnft.Name = name
+}
+
+// IncreaseWins inceases wins of an nft
+func (bnft *BaseNFT) IncreaseWins() {
+	bnft.Wins = bnft.Wins + 1
+}
+
+// IncreaseLosses inceases wins of an nft
+func (bnft *BaseNFT) IncreaseLosses() {
+	bnft.Wins = bnft.Losses + 1
 }
 
 func (bnft BaseNFT) String() string {
@@ -74,7 +94,8 @@ Hash:		%s
 Proof:		%s
 Name:		%s
 Wins:       %v
-Losses:     %v`,
+Losses:     %v
+Price:      %v`,
 		bnft.ID,
 		bnft.Owner,
 		bnft.Hash,
@@ -82,6 +103,7 @@ Losses:     %v`,
 		bnft.Name,
 		bnft.Wins,
 		bnft.Losses,
+		bnft.Price,
 	)
 }
 
@@ -166,7 +188,7 @@ func (nfts NFTs) MarshalJSON() ([]byte, error) {
 	nftJSON := make(NFTJSON)
 	for _, nft := range nfts {
 		id := nft.GetID()
-		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses())
+		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses(), nft.GetAskOrders(), nft.GetBidOrders())
 		nftJSON[id] = bnft
 	}
 	return json.Marshal(nftJSON)

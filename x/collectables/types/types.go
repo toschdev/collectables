@@ -15,6 +15,10 @@ type NFT interface {
 	GetName() string
 	GetWins() uint
 	GetLosses() uint
+	GetPrice() sdk.Coins
+	IncreaseWins()
+	IncreaseLosses()
+	EditPrice(price sdk.Coins)
 	EditMetadata(tokenName string)
 	String() string
 }
