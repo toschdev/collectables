@@ -104,7 +104,7 @@ type CollectablesApp struct {
 	sm *module.SimulationManager
 }
 
-// NewCollectablesApp is a constructor function for nftApp
+// NewCollectablesApp is a constructor function for CollectablesApp
 func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
 	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp)) *CollectablesApp {
 
@@ -132,7 +132,8 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 	}
 
 	// init params keeper and subspaces
-	app.paramsKeeper = params.NewKeeper(app.cdc, keys[params.StoreKey], tkeys[params.TStoreKey], params.DefaultCodespace)
+	app.paramsKeeper = params.NewKeeper(app.cdc, keys[params.StoreKey], tkeys[params.TStoreKey])
+	// Set subspaces
 	authSubspace := app.paramsKeeper.Subspace(auth.DefaultParamspace)
 	bankSubspace := app.paramsKeeper.Subspace(bank.DefaultParamspace)
 	stakingSubspace := app.paramsKeeper.Subspace(staking.DefaultParamspace)
@@ -143,16 +144,16 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(app.cdc, keys[auth.StoreKey], authSubspace, auth.ProtoBaseAccount)
-	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, bank.DefaultCodespace, app.ModuleAccountAddrs())
+	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper, bankSubspace, app.ModuleAccountAddrs())
 	app.supplyKeeper = supply.NewKeeper(app.cdc, keys[supply.StoreKey], app.accountKeeper, app.bankKeeper, maccPerms)
 	stakingKeeper := staking.NewKeeper(
-		app.cdc, keys[staking.StoreKey], app.supplyKeeper, stakingSubspace, staking.DefaultCodespace,
+		app.cdc, keys[staking.StoreKey], app.supplyKeeper, stakingSubspace,
 	)
 	app.mintKeeper = mint.NewKeeper(app.cdc, keys[mint.StoreKey], mintSubspace, &stakingKeeper, app.supplyKeeper, auth.FeeCollectorName)
 	app.distrKeeper = distr.NewKeeper(app.cdc, keys[distr.StoreKey], distrSubspace, &stakingKeeper,
-		app.supplyKeeper, distr.DefaultCodespace, auth.FeeCollectorName, app.ModuleAccountAddrs())
+		app.supplyKeeper, auth.FeeCollectorName, app.ModuleAccountAddrs())
 	app.slashingKeeper = slashing.NewKeeper(
-		app.cdc, keys[slashing.StoreKey], &stakingKeeper, slashingSubspace, slashing.DefaultCodespace,
+		app.cdc, keys[slashing.StoreKey], &stakingKeeper, slashingSubspace,
 	)
 	app.crisisKeeper = crisis.NewKeeper(crisisSubspace, invCheckPeriod, app.supplyKeeper, auth.FeeCollectorName)
 
@@ -166,7 +167,7 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 		staking.NewMultiStakingHooks(app.distrKeeper.Hooks(), app.slashingKeeper.Hooks()),
 	)
 
-	nftModule := nft.NewAppModule(app.nftKeeper)
+	nftModule := nft.NewAppModule(app.nftKeeper, app.accountKeeper)
 	overriddenNFTModule := NewOverrideNFTModule(nftModule, app.nftKeeper)
 
 	// NOTE: Any module instantiated in the module manager that is later modified
@@ -177,10 +178,10 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
 		crisis.NewAppModule(&app.crisisKeeper),
 		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
-		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
+		distr.NewAppModule(app.distrKeeper, app.accountKeeper, app.supplyKeeper, app.stakingKeeper),
 		overriddenNFTModule,
 		mint.NewAppModule(app.mintKeeper),
-		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
+		slashing.NewAppModule(app.slashingKeeper, app.accountKeeper, app.stakingKeeper),
 		staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.supplyKeeper),
 	)
 
@@ -205,18 +206,18 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 	//
 	// NOTE: This is not required for apps that don't use the simulator for fuzz testing
 	// transactions.
-	app.sm = module.NewSimulationManager(
-		auth.NewAppModule(app.accountKeeper),
-		bank.NewAppModule(app.bankKeeper, app.accountKeeper),
-		supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
-		nft.NewAppModule(app.nftKeeper),
-		mint.NewAppModule(app.mintKeeper),
-		distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
-		staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.supplyKeeper),
-		slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
-	)
+	// app.sm = module.NewSimulationManager(
+	// 	auth.NewAppModule(app.accountKeeper),
+	// 	bank.NewAppModule(app.bankKeeper, app.accountKeeper),
+	// 	supply.NewAppModule(app.supplyKeeper, app.accountKeeper),
+	// 	nft.NewAppModule(app.nftKeeper, app.accountKeeper),
+	// 	mint.NewAppModule(app.mintKeeper),
+	// 	distr.NewAppModule(app.distrKeeper, app.supplyKeeper),
+	// 	staking.NewAppModule(app.stakingKeeper, app.accountKeeper, app.supplyKeeper),
+	// 	slashing.NewAppModule(app.slashingKeeper, app.stakingKeeper),
+	// )
 
-	app.sm.RegisterStoreDecoders()
+	// app.sm.RegisterStoreDecoders()
 
 	// initialize stores
 	app.MountKVStores(keys)

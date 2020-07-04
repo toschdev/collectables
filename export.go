@@ -84,7 +84,7 @@ func (app *CollectablesApp) prepForZeroHeightGenesis(ctx sdk.Context, jailWhiteL
 	app.stakingKeeper.IterateValidators(ctx, func(_ int64, val staking.ValidatorI) (stop bool) {
 
 		// donate any unwithdrawn outstanding reward fraction tokens to the community pool
-		scraps := app.distrKeeper.GetValidatorOutstandingRewards(ctx, val.GetOperator())
+		// scraps := app.distrKeeper.GetValidatorOutstandingRewards(ctx, val.GetOperator())
 		feePool := app.distrKeeper.GetFeePool(ctx)
 		// feePool.CommunityPool = feePool.CommunityPool.Add(scraps)
 		app.distrKeeper.SetFeePool(ctx, feePool)
