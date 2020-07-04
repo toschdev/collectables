@@ -23,6 +23,6 @@ make install
 
 ## Tutorial
 
-The whole application is made for and explained at https://toschdev.com/collectables
+The whole application is made for the tutorial and available at https://toschdev.com/collectables
 
 Copyright Tobias Schwarz 2020
