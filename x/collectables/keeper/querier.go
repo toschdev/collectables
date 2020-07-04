@@ -6,7 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/modules/incubator/nft/types"
+
+	"github.com/tosch110/collectables/x/collectables/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )

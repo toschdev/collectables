@@ -132,6 +132,7 @@ type MsgMintNFT struct {
 	Hash      string         `json:"hash" yaml:"hash"`
 	Proof     string         `json:"proof" yaml:"proof"`
 	Name      string         `json:"name" yaml:"name"`
+	Price     sdk.Coins      `json:"price" yaml:"price"`
 }
 
 // NewMsgMintNFT is a constructor function for MsgMintNFT
@@ -144,6 +145,7 @@ func NewMsgMintNFT(sender, recipient sdk.AccAddress, id, denom, hash, proof, nam
 		Hash:      strings.TrimSpace(hash),
 		Proof:     strings.TrimSpace(proof),
 		Name:      strings.TrimSpace(name),
+		Price:     0,
 	}
 }
 
@@ -238,21 +240,19 @@ func (msg MsgBurnNFT) GetSigners() []sdk.AccAddress {
 
 // MsgBuyNFT defines a BuyNFT message
 type MsgBuyNFT struct {
-	Sender    sdk.AccAddress `json:"sender" yaml:"sender"`
-	Recipient sdk.AccAddress `json:"recipient" yaml:"recipient"`
-	ID        string         `json:"id" yaml:"id"`
-	Denom     string         `json:"denom" yaml:"denom"`
-	Bid       sdk.Coins      `json:"bid" yaml:"bid"`
+	Sender sdk.AccAddress `json:"sender" yaml:"sender"`
+	ID     string         `json:"id" yaml:"id"`
+	Denom  string         `json:"denom" yaml:"denom"`
+	Price  sdk.Coins      `json:"price" yaml:"price"`
 }
 
 // NewMsgBuyNFT is a constructor function for MsgBuyNFT
-func NewMsgBuyNFT(sender, recipient sdk.AccAddress, id, denom string, bid sdk.Coins) MsgBuyNFT {
-	return NewMsgBuyNFT{
-		Sender:    sender,
-		Recipient: recipient,
-		ID:        strings.TrimSpace(id),
-		Denom:     strings.TrimSpace(denom),
-		Bid:       bid,
+func NewMsgBuyNFT(sender sdk.AccAddress, id, denom string, price sdk.Coins) MsgBuyNFT {
+	return MsgBuyNFT{
+		Sender: sender,
+		ID:     strings.TrimSpace(id),
+		Denom:  strings.TrimSpace(denom),
+		Price:  price,
 	}
 }
 
@@ -273,10 +273,7 @@ func (msg MsgBuyNFT) ValidateBasic() error {
 	if msg.Sender.Empty() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid sender address")
 	}
-	if msg.Recipient.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid recipient address")
-	}
-	if !msg.Bid.IsAllPositive() {
+	if !msg.Price.IsAllPositive() {
 		return sdkerrors.ErrInsufficientFunds
 	}
 	return nil
@@ -294,37 +291,35 @@ func (msg MsgBuyNFT) GetSigners() []sdk.AccAddress {
 }
 
 /* --------------------------------------------------------------------------- */
-// MsgSellNFT
+// MsgEditNFTPrice
 /* --------------------------------------------------------------------------- */
 
-// MsgSellNFT defines a SellNFT message
-type MsgSellNFT struct {
-	Sender    sdk.AccAddress `json:"sender" yaml:"sender"`
-	Recipient sdk.AccAddress `json:"recipient" yaml:"recipient"`
-	ID        string         `json:"id" yaml:"id"`
-	Denom     string         `json:"denom" yaml:"denom"`
-	Ask       sdk.Coins      `json:"ask" yaml:"ask"`
+// MsgEditNFTPrice defines a SellNFT message
+type MsgEditNFTPrice struct {
+	Sender sdk.AccAddress `json:"sender" yaml:"sender"`
+	ID     string         `json:"id" yaml:"id"`
+	Denom  string         `json:"denom" yaml:"denom"`
+	Price  sdk.Coins      `json:"price" yaml:"price"`
 }
 
-// NewMsgSellNFT is a constructor function for MsgSellNFT
-func NewMsgSellNFT(sender, recipient sdk.AccAddress, id, denom string, ask sdk.Coins) MsgSellNFT {
-	return NewMsgSellNFT{
-		Sender:    sender,
-		Recipient: recipient,
-		ID:        strings.TrimSpace(id),
-		Denom:     strings.TrimSpace(denom),
-		Ask:       ask,
+// NewMsgEditNFTPrice is a constructor function for MsgEditNFTPrice
+func NewMsgEditNFTPrice(sender sdk.AccAddress, id, denom string, price sdk.Coins) MsgEditNFTPrice {
+	return MsgEditNFTPrice{
+		Sender: sender,
+		ID:     strings.TrimSpace(id),
+		Denom:  strings.TrimSpace(denom),
+		Price:  price,
 	}
 }
 
 // Route Implements Msg
-func (msg MsgSellNFT) Route() string { return RouterKey }
+func (msg MsgEditNFTPrice) Route() string { return RouterKey }
 
 // Type Implements Msg
-func (msg MsgSellNFT) Type() string { return "sell_nft" }
+func (msg MsgEditNFTPrice) Type() string { return "edit_nft_price" }
 
 // ValidateBasic Implements Msg.
-func (msg MsgSellNFT) ValidateBasic() error {
+func (msg MsgEditNFTPrice) ValidateBasic() error {
 	if strings.TrimSpace(msg.Denom) == "" {
 		return ErrInvalidNFT
 	}
@@ -334,23 +329,20 @@ func (msg MsgSellNFT) ValidateBasic() error {
 	if msg.Sender.Empty() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid sender address")
 	}
-	if msg.Recipient.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid recipient address")
-	}
-	if !msg.Ask.IsAllPositive() {
+	if !msg.Price.IsAllPositive() {
 		return sdkerrors.ErrInsufficientFunds
 	}
 	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgSellNFT) GetSignBytes() []byte {
+func (msg MsgEditNFTPrice) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners Implements Msg.
-func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
+func (msg MsgEditNFTPrice) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 
@@ -360,30 +352,32 @@ func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
 
 // MsgChallengeNFT defines a ChallengeNFT message
 type MsgChallengeNFT struct {
-	ContenderID    string `json:"contenderid" yaml:"contenderid"`
-	ContenderDenom string `json:"contenderdenom" yaml:"contenderdenom"`
-	DefiantID      string `json:"defiantid" yaml:"defiantid"`
-	DefiantDenom   string `json:"defiantdenom" yaml:"defiantdenom"`
+	Sender         sdk.AccAddress `json:"sender" yaml:"sender"`
+	ContenderID    string         `json:"contenderid" yaml:"contenderid"`
+	ContenderDenom string         `json:"contenderdenom" yaml:"contenderdenom"`
+	DefiantID      string         `json:"defiantid" yaml:"defiantid"`
+	DefiantDenom   string         `json:"defiantdenom" yaml:"defiantdenom"`
 }
 
 // NewMsgChallengeNFT is a constructor function for MsgChallengeNFT
-func NewMsgChallengeNFT(contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
-	return NewMsgChallengeNFT{
+func NewMsgChallengeNFT(sender sdk.AccAddress, contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
+	return MsgChallengeNFT{
+		Sender:         sender,
 		ContenderDenom: strings.TrimSpace(contenderdenom),
 		ContenderID:    strings.TrimSpace(contenderid),
-		DefiantDenom:   strings.TrimSpace(defiantdenom)
+		DefiantDenom:   strings.TrimSpace(defiantdenom),
 		DefiantID:      strings.TrimSpace(defiantid),
 	}
 }
 
 // Route Implements Msg
-func (msg MsgSellNFT) Route() string { return RouterKey }
+func (msg MsgChallengeNFT) Route() string { return RouterKey }
 
 // Type Implements Msg
-func (msg MsgSellNFT) Type() string { return "challenge_nft" }
+func (msg MsgChallengeNFT) Type() string { return "challenge_nft" }
 
 // ValidateBasic Implements Msg.
-func (msg MsgSellNFT) ValidateBasic() error {
+func (msg MsgChallengeNFT) ValidateBasic() error {
 	if strings.TrimSpace(msg.ContenderDenom) == "" {
 		return ErrInvalidNFT
 	}
@@ -396,23 +390,17 @@ func (msg MsgSellNFT) ValidateBasic() error {
 	if strings.TrimSpace(msg.DefiantID) == "" {
 		return ErrInvalidNFT
 	}
-	if msg.Contender.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid contender address")
-	}
-	if msg.Defiant.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid defiant address")
-	}
 	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgSellNFT) GetSignBytes() []byte {
+func (msg MsgChallengeNFT) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners Implements Msg.
-func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
+func (msg MsgChallengeNFT) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 
@@ -422,19 +410,17 @@ func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
 
 // MsgChallengeNFTProof defines a ChallengeNFTProof message
 type MsgChallengeNFTProof struct {
-	Sender    sdk.AccAddress `json:"sender" yaml:"sender"`
-	Recipient sdk.AccAddress `json:"recipient" yaml:"recipient"`
-	ID        string         `json:"id" yaml:"id"`
-	Denom     string         `json:"denom" yaml:"denom"`
+	Sender sdk.AccAddress `json:"sender" yaml:"sender"`
+	ID     string         `json:"id" yaml:"id"`
+	Denom  string         `json:"denom" yaml:"denom"`
 }
 
-// NewMsgChallengeNFTProofis a constructor function for MsgChallengeNFTProof
-func NewMsgChallengeNFTProof(sender, recipient sdk.AccAddress, id, denom, hash, proof string) MsgChallengeNFTProof {
+// NewMsgChallengeNFTProof is a constructor function for MsgChallengeNFTProof
+func NewMsgChallengeNFTProof(sender sdk.AccAddress, denom, id string) MsgChallengeNFTProof {
 	return MsgChallengeNFTProof{
-		Sender:    sender,
-		Recipient: recipient,
-		Denom:     strings.TrimSpace(denom),
-		ID:        strings.TrimSpace(id),
+		Sender: sender,
+		Denom:  strings.TrimSpace(denom),
+		ID:     strings.TrimSpace(id),
 	}
 }
 
@@ -454,9 +440,6 @@ func (msg MsgChallengeNFTProof) ValidateBasic() error {
 	}
 	if msg.Sender.Empty() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid sender address")
-	}
-	if msg.Recipient.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid recipient address")
 	}
 	return nil
 }

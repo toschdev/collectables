@@ -1,5 +1,13 @@
 package types
 
+import (
+	"fmt"
+
+	"github.com/tendermint/tendermint/crypto/tmhash"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
 const (
 	// ModuleName is the name of the module
 	ModuleName = "collectables"

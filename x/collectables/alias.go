@@ -44,10 +44,10 @@ var (
 	GetOwnerKey              = types.GetOwnerKey
 	NewMsgSendNFT            = types.NewMsgSendNFT
 	NewMsgEditNFTMetadata    = types.NewMsgEditNFTMetadata
+	NewMsgEditNFTPrice       = types.NewMsgEditNFTPrice
 	NewMsgMintNFT            = types.NewMsgMintNFT
 	NewMsgBurnNFT            = types.NewMsgBurnNFT
 	NewMsgBuyNFT             = types.NewMsgBuyNFT
-	NewMsgSellNFT            = types.NewMsgSellNFT
 	NewMsgChallengeNFT       = types.NewMsgChallengeNFT
 	NewMsgChallengeNFTProof  = types.NewMsgChallengeNFTProof
 	NewBaseNFT               = types.NewBaseNFT
@@ -72,6 +72,7 @@ var (
 	AttributeKeyNFTName      = types.AttributeKeyNFTName
 	AttributeKeyNFTHash      = types.AttributeKeyNFTHash
 	AttributeKeyNFTProof     = types.AttributeKeyNFTProof
+	AttributeKeyNFTPrice     = types.AttributeKeyNFTPrice
 	AttributeKeyDenom        = types.AttributeKeyDenom
 	CollectionsKeyPrefix     = types.CollectionsKeyPrefix
 	OwnersKeyPrefix          = types.OwnersKeyPrefix
@@ -85,10 +86,10 @@ type (
 	GenesisState          = types.GenesisState
 	MsgSendNFT            = types.MsgSendNFT
 	MsgEditNFTMetadata    = types.MsgEditNFTMetadata
+	MsgEditNFTPrice       = types.MsgEditNFTPrice
 	MsgMintNFT            = types.MsgMintNFT
 	MsgBurnNFT            = types.MsgBurnNFT
 	MsgBuyNFT             = types.MsgBuyNFT
-	MsgSellNFT            = types.MsgSellNFT
 	MsgChallengeNFT       = types.MsgChallengeNFT
 	MsgChallengeNFTProof  = types.MsgChallengeNFTProof
 	BaseNFT               = types.BaseNFT

@@ -24,6 +24,8 @@ const (
 	flagHash  = "hash"
 	flagName  = "name"
 	flagProof = "proof"
+	flagBid   = "bid"
+	flagAsk   = "ask"
 )
 
 // GetTxCmd returns the transaction commands for this module
@@ -109,14 +111,14 @@ $ %s tx %s edit-metadata collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428f
 
 			denom := args[0]
 			tokenID := args[1]
-			name := viper.GetString(name)
+			name := viper.GetString(flagName)
 
 			msg := types.NewMsgEditNFTMetadata(cliCtx.GetFromAddress(), tokenID, denom, name)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 
-	cmd.Flags().String(flagTokenURI, "", "Extra properties available for querying")
+	cmd.Flags().String(flagName, "", "Extra properties available for querying")
 	return cmd
 }
 
@@ -158,7 +160,7 @@ cosmos1gghjut3ccd8ay0zduzj64hwre2fxs9ld75ru9p --from mykey
 		},
 	}
 
-	cmd.Flags().String(flagTokenURI, "", "URI for supplemental off-chain metadata (should return a JSON object)")
+	cmd.Flags().String(flagName, "", "URI for supplemental off-chain metadata (should return a JSON object)")
 
 	return cmd
 }
@@ -203,7 +205,7 @@ func GetCmdBuyNFT(cdc *codec.Codec) *cobra.Command {
 			specific id (SHA-256 hex hash).
 Example:
 $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
---from mykey
+--from mykey --bid 1000
 `,
 				version.ClientName, types.ModuleName,
 			),
@@ -217,7 +219,12 @@ $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e
 			denom := args[0]
 			tokenID := args[1]
 
-			msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), tokenID, denom)
+			bid, err := sdk.ParseCoins(viper.GetString(flagBid))
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), tokenID, denom, bid)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -233,7 +240,7 @@ func GetCmdSellNFT(cdc *codec.Codec) *cobra.Command {
 			specific id (SHA-256 hex hash).
 Example:
 $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
---from mykey
+--from mykey --ask 1000
 `,
 				version.ClientName, types.ModuleName,
 			),
@@ -247,7 +254,12 @@ $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e
 			denom := args[0]
 			tokenID := args[1]
 
-			msg := types.NewMsgSellNFT(cliCtx.GetFromAddress(), tokenID, denom)
+			ask, err := sdk.ParseCoins(viper.GetString(flagAsk))
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgSellNFT(cliCtx.GetFromAddress(), tokenID, denom, ask)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -310,7 +322,7 @@ $ %s tx %s challengeproof collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428
 			denom := args[0]
 			token := args[1]
 
-			msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), denom, token)
+			msg := types.NewMsgChallengeNFTProof(cliCtx.GetFromAddress(), denom, token)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}

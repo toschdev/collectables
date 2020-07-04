@@ -6,7 +6,7 @@ var (
 	EventTypeEditNFTMetadata   = "edit_nft_metadata"
 	EventTypeMintNFT           = "mint_nft"
 	EventTypeBuyNFT            = "buy_nft"
-	EventTypeSellNFT           = "sell_nft"
+	EventTypeEditNFTPrice      = "edit_nft_price"
 	EventTypeBurnNFT           = "burn_nft"
 	EventTypeChallengeNFT      = "challenge_nft"
 	EventTypeChallengeNFTProof = "challenge_nft_proof"
@@ -23,4 +23,5 @@ var (
 	AttributeKeyWins      = "wins"
 	AttributeKeyLosses    = "losses"
 	AttributeKeyDenom     = "denom"
+	AttributeKeyPrice     = "price"
 )
