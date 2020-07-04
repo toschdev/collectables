@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/tosch110/collectables"
+	nft "github.com/tosch110/collectables/x/collectables"
 )
 
 // OverrideNFTModule overrides the NFT module for custom handlers

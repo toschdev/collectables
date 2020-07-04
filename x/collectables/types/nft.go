@@ -19,18 +19,20 @@ type BaseNFT struct {
 	Hash   string `json:"hash" yaml:"hash"` // blake3 hash of the proof
 	Proof  string `json:"proof" yaml:"proof"`
 	Name   string `json:"name" yaml:"name"`
-	Wins   uint    `json:"wins" yaml:"wins"`
-	Losses uint    `json:"losses" yaml:"losses"`
+	Wins   uint   `json:"wins" yaml:"wins"`
+	Losses uint   `json:"losses" yaml:"losses"`
 }
 
 // NewBaseNFT creates a new NFT instance
-func NewBaseNFT(id string, owner sdk.AccAddress, hash, proof, name string) BaseNFT {
+func NewBaseNFT(id string, owner sdk.AccAddress, hash, proof, name string, wins, losses uint) BaseNFT {
 	return BaseNFT{
-		ID:    id,
-		Owner: owner,
-		Hash:  strings.TrimSpace(hash),
-		Proof: strings.TrimSpace(proof),
-		Name:  strings.TrimSpace(name),
+		ID:     id,
+		Owner:  owner,
+		Hash:   strings.TrimSpace(hash),
+		Proof:  strings.TrimSpace(proof),
+		Name:   strings.TrimSpace(name),
+		Wins:   wins,
+		Losses: losses,
 	}
 }
 
@@ -61,8 +63,8 @@ func (bnft BaseNFT) GetWins() uint { return bnft.Wins }
 func (bnft BaseNFT) GetLosses() uint { return bnft.Losses }
 
 // EditMetadata edits metadata of an nft
-func (bnft *BaseNFT) EditMetadata(tokenURI string) {
-	bnft.TokenURI = tokenURI
+func (bnft *BaseNFT) EditMetadata(name string) {
+	bnft.Name = name
 }
 
 func (bnft BaseNFT) String() string {
@@ -79,7 +81,7 @@ Losses:     %v`,
 		bnft.Proof,
 		bnft.Name,
 		bnft.Wins,
-		bnft.Losses
+		bnft.Losses,
 	)
 }
 

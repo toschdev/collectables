@@ -24,7 +24,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/supply"
-	nft "github.com/tosch110/collectables"
+	nft "github.com/tosch110/collectables/x/collectables"
 )
 
 const appName = "collectables"

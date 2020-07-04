@@ -247,7 +247,7 @@ type MsgBuyNFT struct {
 
 // NewMsgBuyNFT is a constructor function for MsgBuyNFT
 func NewMsgBuyNFT(sender, recipient sdk.AccAddress, id, denom string, bid sdk.Coins) MsgBuyNFT {
-	return NewMsgBuyNFT{
+	return MsgBuyNFT{
 		Sender:    sender,
 		Recipient: recipient,
 		ID:        strings.TrimSpace(id),
@@ -308,7 +308,7 @@ type MsgSellNFT struct {
 
 // NewMsgSellNFT is a constructor function for MsgSellNFT
 func NewMsgSellNFT(sender, recipient sdk.AccAddress, id, denom string, ask sdk.Coins) MsgSellNFT {
-	return NewMsgSellNFT{
+	return MsgSellNFT{
 		Sender:    sender,
 		Recipient: recipient,
 		ID:        strings.TrimSpace(id),
@@ -360,30 +360,32 @@ func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
 
 // MsgChallengeNFT defines a ChallengeNFT message
 type MsgChallengeNFT struct {
-	ContenderID    string `json:"contenderid" yaml:"contenderid"`
-	ContenderDenom string `json:"contenderdenom" yaml:"contenderdenom"`
-	DefiantID      string `json:"defiantid" yaml:"defiantid"`
-	DefiantDenom   string `json:"defiantdenom" yaml:"defiantdenom"`
+	Sender         sdk.AccAddress `json:"sender" yaml:"sender"`
+	ContenderID    string         `json:"contenderid" yaml:"contenderid"`
+	ContenderDenom string         `json:"contenderdenom" yaml:"contenderdenom"`
+	DefiantID      string         `json:"defiantid" yaml:"defiantid"`
+	DefiantDenom   string         `json:"defiantdenom" yaml:"defiantdenom"`
 }
 
 // NewMsgChallengeNFT is a constructor function for MsgChallengeNFT
-func NewMsgChallengeNFT(contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
-	return NewMsgChallengeNFT{
+func NewMsgChallengeNFT(sender sdk.AccAddress, contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
+	return MsgChallengeNFT{
+		Sender:         sender,
 		ContenderDenom: strings.TrimSpace(contenderdenom),
 		ContenderID:    strings.TrimSpace(contenderid),
-		DefiantDenom:   strings.TrimSpace(defiantdenom)
+		DefiantDenom:   strings.TrimSpace(defiantdenom),
 		DefiantID:      strings.TrimSpace(defiantid),
 	}
 }
 
 // Route Implements Msg
-func (msg MsgSellNFT) Route() string { return RouterKey }
+func (msg MsgChallengeNFT) Route() string { return RouterKey }
 
 // Type Implements Msg
-func (msg MsgSellNFT) Type() string { return "challenge_nft" }
+func (msg MsgChallengeNFT) Type() string { return "challenge_nft" }
 
 // ValidateBasic Implements Msg.
-func (msg MsgSellNFT) ValidateBasic() error {
+func (msg MsgChallengeNFT) ValidateBasic() error {
 	if strings.TrimSpace(msg.ContenderDenom) == "" {
 		return ErrInvalidNFT
 	}
@@ -396,23 +398,17 @@ func (msg MsgSellNFT) ValidateBasic() error {
 	if strings.TrimSpace(msg.DefiantID) == "" {
 		return ErrInvalidNFT
 	}
-	if msg.Contender.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid contender address")
-	}
-	if msg.Defiant.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid defiant address")
-	}
 	return nil
 }
 
 // GetSignBytes Implements Msg.
-func (msg MsgSellNFT) GetSignBytes() []byte {
+func (msg MsgChallengeNFT) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners Implements Msg.
-func (msg MsgSellNFT) GetSigners() []sdk.AccAddress {
+func (msg MsgChallengeNFT) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }
 

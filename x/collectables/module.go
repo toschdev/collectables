@@ -19,7 +19,6 @@ import (
 
 	"github.com/tosch110/collectables/x/collectables/client/cli"
 	"github.com/tosch110/collectables/x/collectables/client/rest"
-	"github.com/tosch110/collectables/x/collectables/simulation"
 	"github.com/tosch110/collectables/x/collectables/types"
 )
 
