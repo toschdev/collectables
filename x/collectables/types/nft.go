@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var _ NFT = (*BaseNFT)(nil)
+// var _ NFT = (*BaseNFT)(nil)
 
 // BaseNFT non fungible token definition
 type BaseNFT struct {
@@ -65,7 +65,7 @@ func (bnft BaseNFT) GetWins() uint { return bnft.Wins }
 func (bnft BaseNFT) GetLosses() uint { return bnft.Losses }
 
 // GetPrice returns the price for an NFT Token
-func (bnft *BaseNFT) GetPrice() uint { return bnft.Price }
+func (bnft *BaseNFT) GetPrice() sdk.Coins { return bnft.Price }
 
 // EditPrice removes an Ask order to an nft.
 func (bnft *BaseNFT) EditPrice(price sdk.Coins) {
@@ -188,7 +188,7 @@ func (nfts NFTs) MarshalJSON() ([]byte, error) {
 	nftJSON := make(NFTJSON)
 	for _, nft := range nfts {
 		id := nft.GetID()
-		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses(), nft.GetAskOrders(), nft.GetBidOrders())
+		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses(), nft.GetPrice())
 		nftJSON[id] = bnft
 	}
 	return json.Marshal(nftJSON)
@@ -202,7 +202,7 @@ func (nfts *NFTs) UnmarshalJSON(b []byte) error {
 	}
 
 	for id, nft := range nftJSON {
-		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses())
+		bnft := NewBaseNFT(id, nft.GetOwner(), nft.GetHash(), nft.GetProof(), nft.GetName(), nft.GetWins(), nft.GetLosses(), nft.GetPrice())
 		*nfts = append(*nfts, &bnft)
 	}
 	return nil

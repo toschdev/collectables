@@ -49,7 +49,6 @@ var (
 	NewMsgBurnNFT            = types.NewMsgBurnNFT
 	NewMsgBuyNFT             = types.NewMsgBuyNFT
 	NewMsgChallengeNFT       = types.NewMsgChallengeNFT
-	NewMsgChallengeNFTProof  = types.NewMsgChallengeNFTProof
 	NewBaseNFT               = types.NewBaseNFT
 	NewNFTs                  = types.NewNFTs
 	NewIDCollection          = types.NewIDCollection
@@ -60,7 +59,7 @@ var (
 
 	// variable aliases
 	ModuleCdc                = types.ModuleCdc
-	EventTypeTransfer        = types.EventTypeTransfer
+	EventTypeSend            = types.EventTypeSend
 	EventTypeEditNFTMetadata = types.EventTypeEditNFTMetadata
 	EventTypeMintNFT         = types.EventTypeMintNFT
 	EventTypeBurnNFT         = types.EventTypeBurnNFT
@@ -91,7 +90,6 @@ type (
 	MsgBurnNFT            = types.MsgBurnNFT
 	MsgBuyNFT             = types.MsgBuyNFT
 	MsgChallengeNFT       = types.MsgChallengeNFT
-	MsgChallengeNFTProof  = types.MsgChallengeNFTProof
 	BaseNFT               = types.BaseNFT
 	NFTs                  = types.NFTs
 	NFTJSON               = types.NFTJSON

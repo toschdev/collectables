@@ -14,6 +14,8 @@ import (
 
 // Keeper maintains the link to data storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
+	CoinKeeper types.BankKeeper
+
 	storeKey sdk.StoreKey // Unexposed key to access store from sdk.Context
 
 	cdc *codec.Codec // The amino codec for binary encoding/decoding.

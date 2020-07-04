@@ -2,14 +2,13 @@ package types
 
 // NFT module event types
 var (
-	EventTypeSend              = "send_nft"
-	EventTypeEditNFTMetadata   = "edit_nft_metadata"
-	EventTypeMintNFT           = "mint_nft"
-	EventTypeBuyNFT            = "buy_nft"
-	EventTypeEditNFTPrice      = "edit_nft_price"
-	EventTypeBurnNFT           = "burn_nft"
-	EventTypeChallengeNFT      = "challenge_nft"
-	EventTypeChallengeNFTProof = "challenge_nft_proof"
+	EventTypeSend            = "send_nft"
+	EventTypeEditNFTMetadata = "edit_nft_metadata"
+	EventTypeMintNFT         = "mint_nft"
+	EventTypeBuyNFT          = "buy_nft"
+	EventTypeEditNFTPrice    = "edit_nft_price"
+	EventTypeBurnNFT         = "burn_nft"
+	EventTypeChallengeNFT    = "challenge_nft"
 
 	AttributeValueCategory = ModuleName
 
@@ -20,8 +19,9 @@ var (
 	AttributeKeyNFTName   = "name"
 	AttributeKeyNFTHash   = "hash"
 	AttributeKeyNFTProof  = "proof"
-	AttributeKeyWins      = "wins"
-	AttributeKeyLosses    = "losses"
+	AttributeKeyNFTWins   = "wins"
+	AttributeKeyNFTLosses = "losses"
 	AttributeKeyDenom     = "denom"
-	AttributeKeyPrice     = "price"
+	AttributeKeyNFTPrice  = "price"
+	AttributeKeyNFTWinner = "winner"
 )

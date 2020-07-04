@@ -123,7 +123,7 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 	)
 	tkeys := sdk.NewTransientStoreKeys(staking.TStoreKey, params.TStoreKey)
 
-	app := &CosmicApp{
+	app := &CollectablesApp{
 		BaseApp:        bApp,
 		cdc:            cdc,
 		invCheckPeriod: invCheckPeriod,
@@ -239,17 +239,17 @@ func NewCollectablesApp(logger log.Logger, db dbm.DB, traceStore io.Writer, load
 }
 
 // application updates every begin block
-func (app *CosmicApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *CollectablesApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	return app.mm.BeginBlock(ctx, req)
 }
 
 // application updates every end block
-func (app *CosmicApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+func (app *CollectablesApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	return app.mm.EndBlock(ctx, req)
 }
 
 // application update at chain initialization
-func (app *CosmicApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *CollectablesApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState simapp.GenesisState
 	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
 
@@ -257,12 +257,12 @@ func (app *CosmicApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) ab
 }
 
 // load a particular height
-func (app *CosmicApp) LoadHeight(height int64) error {
+func (app *CollectablesApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height, app.keys[bam.MainStoreKey])
 }
 
 // ModuleAccountAddrs returns all the app's module account addresses.
-func (app *CosmicApp) ModuleAccountAddrs() map[string]bool {
+func (app *CollectablesApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
@@ -272,7 +272,7 @@ func (app *CosmicApp) ModuleAccountAddrs() map[string]bool {
 }
 
 // Codec returns the application's sealed codec.
-func (app *CosmicApp) Codec() *codec.Codec {
+func (app *CollectablesApp) Codec() *codec.Codec {
 	return app.cdc
 }
 

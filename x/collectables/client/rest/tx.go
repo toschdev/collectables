@@ -45,17 +45,18 @@ func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router,
 		challengeNFTHandler(cdc, cliCtx),
 	).Methods("POST")
 
+	// Update an NFT Price
+	r.HandleFunc(
+		"/nfts/collection/{denom}/nft/{id}/price",
+		editNFTPriceHandler(cdc, cliCtx),
+	).Methods("PUT")
+
 	// Buy an NFT
 	r.HandleFunc(
 		"/nfts/collection/{denom}/nft/{id}/buy",
 		buyNFTHandler(cdc, cliCtx),
 	).Methods("POST")
 
-	// Sell an NFT
-	r.HandleFunc(
-		"/nfts/collection/{denom}/nft/{id}/sell",
-		sellNFTHandler(cdc, cliCtx),
-	).Methods("POST")
 }
 
 type sendNFTReq struct {
@@ -122,6 +123,7 @@ type mintNFTReq struct {
 	Name      string         `json:"name"`
 	Hash      string         `json:"hash"`
 	Proof     string         `json:"proof"`
+	Price     sdk.Coins      `json:"price"`
 }
 
 func mintNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -137,7 +139,7 @@ func mintNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFun
 		}
 
 		// create the message
-		msg := types.NewMsgMintNFT(cliCtx.GetFromAddress(), req.Recipient, req.ID, req.Denom, req.Name, req.Hash, req.Proof)
+		msg := types.NewMsgMintNFT(cliCtx.GetFromAddress(), req.Recipient, req.ID, req.Denom, req.Name, req.Hash, req.Proof, req.Price)
 
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
@@ -171,7 +173,7 @@ type buyNFTReq struct {
 	BaseReq rest.BaseReq `json:"base_req"`
 	Denom   string       `json:"denom"`
 	ID      string       `json:"id"`
-	Bid     sdk.Coins    `json:"bid"`
+	Price   sdk.Coins    `json:"price"`
 }
 
 func buyNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -187,21 +189,21 @@ func buyNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc
 		}
 
 		// create the message
-		msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), req.ID, req.Denom, req.Bid)
+		msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), req.ID, req.Denom, req.Price)
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
 
-type sellNFTReq struct {
+type editNFTPriceReq struct {
 	BaseReq rest.BaseReq `json:"base_req"`
 	Denom   string       `json:"denom"`
 	ID      string       `json:"id"`
-	Ask     sdk.Coins    `json:"ask"`
+	Price   sdk.Coins    `json:"price"`
 }
 
-func sellNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+func editNFTPriceHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req sellNFTReq
+		var req editNFTPriceReq
 		if !rest.ReadRESTReq(w, r, cdc, &req) {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, "failed to parse request")
 			return
@@ -212,17 +214,17 @@ func sellNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFun
 		}
 
 		// create the message
-		msg := types.NewMsgSellNFT(cliCtx.GetFromAddress(), req.ID, req.Denom, req.Ask)
+		msg := types.NewMsgEditNFTPrice(cliCtx.GetFromAddress(), req.ID, req.Denom, req.Price)
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }
 
 type challengeNFTReq struct {
 	BaseReq        rest.BaseReq `json:"base_req"`
+	DefiantDenom   string       `json:"denom"`
+	DefiantID      string       `json:"id"`
 	ContenderDenom string       `json:"contenderdenom"`
 	ContenderID    string       `json:"contenderid"`
-	DefiantDenom   string       `json:"defiantdenom"`
-	DefiantID      string       `json:"defiantid"`
 }
 
 func challengeNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
@@ -238,32 +240,7 @@ func challengeNFTHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.Handl
 		}
 
 		// create the message
-		msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), req.ContenderDenom, req.ContenderID, req.DefiantDenom, req.DefiantID)
-		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
-	}
-}
-
-type challengeNFTProofReq struct {
-	BaseReq   rest.BaseReq `json:"base_req"`
-	Denom     string       `json:"denom"`
-	ID        string       `json:"id"`
-	Recipient string       `json:"recipient"`
-}
-
-func challengeNFTProofHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var req challengeNFTProofReq
-		if !rest.ReadRESTReq(w, r, cdc, &req) {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, "failed to parse request")
-			return
-		}
-		baseReq := req.BaseReq.Sanitize()
-		if !baseReq.ValidateBasic(w) {
-			return
-		}
-
-		// create the message
-		msg := types.NewMsgChallengeNFTProof(cliCtx.GetFromAddress(), req.Denom, req.ID)
+		msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), req.ContenderDenom, req.ContenderID, req.DefiantDenom, req.DefiantID, "")
 		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
 	}
 }

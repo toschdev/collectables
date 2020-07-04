@@ -136,7 +136,7 @@ type MsgMintNFT struct {
 }
 
 // NewMsgMintNFT is a constructor function for MsgMintNFT
-func NewMsgMintNFT(sender, recipient sdk.AccAddress, id, denom, hash, proof, name string) MsgMintNFT {
+func NewMsgMintNFT(sender, recipient sdk.AccAddress, id, denom, hash, proof, name string, price sdk.Coins) MsgMintNFT {
 	return MsgMintNFT{
 		Sender:    sender,
 		Recipient: recipient,
@@ -145,7 +145,7 @@ func NewMsgMintNFT(sender, recipient sdk.AccAddress, id, denom, hash, proof, nam
 		Hash:      strings.TrimSpace(hash),
 		Proof:     strings.TrimSpace(proof),
 		Name:      strings.TrimSpace(name),
-		Price:     0,
+		Price:     price,
 	}
 }
 
@@ -357,16 +357,18 @@ type MsgChallengeNFT struct {
 	ContenderDenom string         `json:"contenderdenom" yaml:"contenderdenom"`
 	DefiantID      string         `json:"defiantid" yaml:"defiantid"`
 	DefiantDenom   string         `json:"defiantdenom" yaml:"defiantdenom"`
+	Winner         string         `json:"winner" yaml:"winner"`
 }
 
 // NewMsgChallengeNFT is a constructor function for MsgChallengeNFT
-func NewMsgChallengeNFT(sender sdk.AccAddress, contenderid, contenderdenom, defiantid, defiantdenom string) MsgChallengeNFT {
+func NewMsgChallengeNFT(sender sdk.AccAddress, contenderid, contenderdenom, defiantid, defiantdenom, winner string) MsgChallengeNFT {
 	return MsgChallengeNFT{
 		Sender:         sender,
 		ContenderDenom: strings.TrimSpace(contenderdenom),
 		ContenderID:    strings.TrimSpace(contenderid),
 		DefiantDenom:   strings.TrimSpace(defiantdenom),
 		DefiantID:      strings.TrimSpace(defiantid),
+		Winner:         strings.TrimSpace(winner),
 	}
 }
 
@@ -401,56 +403,5 @@ func (msg MsgChallengeNFT) GetSignBytes() []byte {
 
 // GetSigners Implements Msg.
 func (msg MsgChallengeNFT) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Sender}
-}
-
-/* --------------------------------------------------------------------------- */
-// MsgChallengeNFTProof
-/* --------------------------------------------------------------------------- */
-
-// MsgChallengeNFTProof defines a ChallengeNFTProof message
-type MsgChallengeNFTProof struct {
-	Sender sdk.AccAddress `json:"sender" yaml:"sender"`
-	ID     string         `json:"id" yaml:"id"`
-	Denom  string         `json:"denom" yaml:"denom"`
-}
-
-// NewMsgChallengeNFTProof is a constructor function for MsgChallengeNFTProof
-func NewMsgChallengeNFTProof(sender sdk.AccAddress, denom, id string) MsgChallengeNFTProof {
-	return MsgChallengeNFTProof{
-		Sender: sender,
-		Denom:  strings.TrimSpace(denom),
-		ID:     strings.TrimSpace(id),
-	}
-}
-
-// Route Implements Msg
-func (msg MsgChallengeNFTProof) Route() string { return RouterKey }
-
-// Type Implements Msg
-func (msg MsgChallengeNFTProof) Type() string { return "challenge_nft_proof" }
-
-// ValidateBasic Implements Msg.
-func (msg MsgChallengeNFTProof) ValidateBasic() error {
-	if strings.TrimSpace(msg.Denom) == "" {
-		return ErrInvalidNFT
-	}
-	if strings.TrimSpace(msg.ID) == "" {
-		return ErrInvalidNFT
-	}
-	if msg.Sender.Empty() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "invalid sender address")
-	}
-	return nil
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgChallengeNFTProof) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
-// GetSigners Implements Msg.
-func (msg MsgChallengeNFTProof) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
 }

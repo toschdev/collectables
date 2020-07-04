@@ -24,8 +24,7 @@ const (
 	flagHash  = "hash"
 	flagName  = "name"
 	flagProof = "proof"
-	flagBid   = "bid"
-	flagAsk   = "ask"
+	flagPrice = "price"
 )
 
 // GetTxCmd returns the transaction commands for this module
@@ -154,8 +153,14 @@ cosmos1gghjut3ccd8ay0zduzj64hwre2fxs9ld75ru9p --from mykey
 			hash := viper.GetString(flagHash)
 			name := viper.GetString(flagProof)
 			proof := viper.GetString(flagName)
+			price := viper.GetString(flagPrice)
 
-			msg := types.NewMsgMintNFT(cliCtx.GetFromAddress(), recipient, tokenID, denom, hash, proof, name)
+			priceCoins, err := sdk.ParseCoins(price)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgMintNFT(cliCtx.GetFromAddress(), recipient, tokenID, denom, hash, proof, name, priceCoins)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -205,7 +210,7 @@ func GetCmdBuyNFT(cdc *codec.Codec) *cobra.Command {
 			specific id (SHA-256 hex hash).
 Example:
 $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
---from mykey --bid 1000
+--from mykey --price 1000
 `,
 				version.ClientName, types.ModuleName,
 			),
@@ -219,28 +224,28 @@ $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e
 			denom := args[0]
 			tokenID := args[1]
 
-			bid, err := sdk.ParseCoins(viper.GetString(flagBid))
+			price, err := sdk.ParseCoins(viper.GetString(flagPrice))
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), tokenID, denom, bid)
+			msg := types.NewMsgBuyNFT(cliCtx.GetFromAddress(), tokenID, denom, price)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
 }
 
-// GetCmdSellNFT is the CLI command for sending a SellNFT transaction
-func GetCmdSellNFT(cdc *codec.Codec) *cobra.Command {
+// GetCmdEditNFTPrice is the CLI command for sending a EditNFTPrice transaction
+func GetCmdEditNFTPrice(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "sell [denom] [tokenID]",
-		Short: "sell an NFT",
+		Use:   "edit-price [denom] [tokenID] [price]",
+		Short: "sell an NFT with putting a price tag",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`Sell (i.e make an offer) an NFT from a given collection that has a 
 			specific id (SHA-256 hex hash).
 Example:
-$ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
---from mykey --ask 1000
+$ %s tx %s edit-price collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
+--from mykey --price 1000
 `,
 				version.ClientName, types.ModuleName,
 			),
@@ -254,12 +259,12 @@ $ %s tx %s buy collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e
 			denom := args[0]
 			tokenID := args[1]
 
-			ask, err := sdk.ParseCoins(viper.GetString(flagAsk))
+			price, err := sdk.ParseCoins(viper.GetString(flagPrice))
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgSellNFT(cliCtx.GetFromAddress(), tokenID, denom, ask)
+			msg := types.NewMsgEditNFTPrice(cliCtx.GetFromAddress(), tokenID, denom, price)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}
@@ -291,38 +296,9 @@ $ %s tx %s challenge collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9
 
 			defiantDenom := args[2]
 			defiantTokenID := args[3]
+			winner := ""
 
-			msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), contenderTokenID, contenderDenom, defiantTokenID, defiantDenom)
-			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
-		},
-	}
-}
-
-// GetCmdChallengeNFTProof is the CLI command for sending a ChallengeNFTProof transaction
-func GetCmdChallengeNFTProof(cdc *codec.Codec) *cobra.Command {
-	return &cobra.Command{
-		Use:   "challengeproof [contenderdenom] [contendertokenID] [defiantdenom] [defianttokenID]",
-		Short: "sell an NFT",
-		Long: strings.TrimSpace(
-			fmt.Sprintf(`Challenge Proof of an NFT from a given collection that has a 
-			specific id (SHA-256 hex hash).
-Example:
-$ %s tx %s challengeproof collectables d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa \
---from mykey
-`,
-				version.ClientName, types.ModuleName,
-			),
-		),
-		Args: cobra.ExactArgs(2),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			inBuf := bufio.NewReader(cmd.InOrStdin())
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
-
-			denom := args[0]
-			token := args[1]
-
-			msg := types.NewMsgChallengeNFTProof(cliCtx.GetFromAddress(), denom, token)
+			msg := types.NewMsgChallengeNFT(cliCtx.GetFromAddress(), contenderTokenID, contenderDenom, defiantTokenID, defiantDenom, winner)
 			return utils.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 		},
 	}

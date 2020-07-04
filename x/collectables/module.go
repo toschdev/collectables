@@ -4,7 +4,6 @@ package collectables
 
 import (
 	"encoding/json"
-	"math/rand"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
@@ -15,7 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	sim "github.com/cosmos/cosmos-sdk/x/simulation"
+	// sim "github.com/cosmos/cosmos-sdk/x/simulation"
 
 	"github.com/tosch110/collectables/x/collectables/client/cli"
 	"github.com/tosch110/collectables/x/collectables/client/rest"
@@ -23,9 +22,8 @@ import (
 )
 
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
-	_ module.AppModuleSimulation = AppModule{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // AppModuleBasic app module basics object
@@ -148,22 +146,22 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 }
 
 // RegisterStoreDecoder registers a decoder for nft module's types
-func (AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
-	sdr[StoreKey] = simulation.DecodeStore
-}
+// func (AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// 	sdr[StoreKey] = simulation.DecodeStore
+// }
 
 // ProposalContents doesn't return any content functions for governance proposals.
-func (AppModule) ProposalContents(_ module.SimulationState) []sim.WeightedProposalContent { return nil }
+// func (AppModule) ProposalContents(_ module.SimulationState) []sim.WeightedProposalContent { return nil }
 
-// GenerateGenesisState creates a randomized GenState of the nft module.
-func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
-	simulation.RandomizedGenState(simState)
-}
+// // GenerateGenesisState creates a randomized GenState of the nft module.
+// func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
+// 	simulation.RandomizedGenState(simState)
+// }
 
-// RandomizedParams doesn't create randomized nft param changes for the simulator.
-func (AppModule) RandomizedParams(_ *rand.Rand) []sim.ParamChange { return nil }
+// // RandomizedParams doesn't create randomized nft param changes for the simulator.
+// func (AppModule) RandomizedParams(_ *rand.Rand) []sim.ParamChange { return nil }
 
 // WeightedOperations doesn't return any operation for the nft module.
-func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
-	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper)
-}
+// func (am AppModule) WeightedOperations(simState module.SimulationState) []sim.WeightedOperation {
+// 	return simulation.WeightedOperations(simState.AppParams, simState.Cdc, am.accountKeeper, am.keeper)
+// }
